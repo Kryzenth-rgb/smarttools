@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/tool_launcher.dart';
 import '../../models/tool.dart';
 import '../../widgets/tool_tile.dart';
 
@@ -169,12 +170,7 @@ class _Shortcut extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () {
-        markRecent(tool.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tool.name} : bientôt disponible')),
-        );
-      },
+      onTap: () => openTool(context, tool),
       child: Padding(
         padding: const EdgeInsets.all(6),
         child: Column(
