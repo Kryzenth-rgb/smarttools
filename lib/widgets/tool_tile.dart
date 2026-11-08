@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../features/tool_launcher.dart';
 import '../models/tool.dart';
 
 class ToolTile extends StatelessWidget {
@@ -35,12 +36,7 @@ class ToolTile extends StatelessWidget {
               ),
               onPressed: () => toggleFavorite(tool.id),
             ),
-            onTap: () {
-              markRecent(tool.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${tool.name} : bientôt disponible')),
-              );
-            },
+            onTap: () => openTool(context, tool),
           ),
         );
       },
