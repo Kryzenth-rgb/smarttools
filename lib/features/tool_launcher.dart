@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../models/tool.dart';
 import 'calculator/calculator_screen.dart';
+import 'converter/converter_screen.dart';
 
 Widget? _screenFor(String id) {
   switch (id) {
     case 'calculator':
       return const CalculatorScreen();
+    case 'converter':
+      return const ConverterScreen();
     default:
       return null;
   }
