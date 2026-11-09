@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'app/theme.dart';
+import 'services/storage_service.dart';
 import 'shell/main_shell.dart';
 
-void main() => runApp(const SmartToolsApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppStorage.init();
+  runApp(const SmartToolsApp());
+}
 
 class SmartToolsApp extends StatelessWidget {
   const SmartToolsApp({super.key});
