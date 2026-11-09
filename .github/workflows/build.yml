@@ -26,6 +26,8 @@ jobs:
       - name: Générer les dossiers de plateforme
         run: flutter create --platforms=web,android --project-name smarttools --org com.smartlifeapps .
       - run: flutter pub get
+      - name: Analyse du code
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
       - run: flutter build web --release --base-href "/smarttools/"
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -51,6 +53,8 @@ jobs:
           cache: true
       - name: Générer les dossiers de plateforme
         run: flutter create --platforms=web,android --project-name smarttools --org com.smartlifeapps .
+      - name: Autoriser la vibration (Android)
+        run: sed -i 's#<application#<uses-permission android:name="android.permission.VIBRATE"/>\n    <application#' android/app/src/main/AndroidManifest.xml
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
