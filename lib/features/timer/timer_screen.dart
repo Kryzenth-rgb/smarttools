@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../services/alert_service.dart';
+
 enum _TimerState { idle, running, paused, finished }
 
 class TimerScreen extends StatefulWidget {
@@ -28,6 +30,7 @@ class _TimerScreenState extends State<TimerScreen> {
   void dispose() {
     _ticker?.cancel();
     _alarm?.cancel();
+    AlertService.stop();
     _h.dispose();
     _m.dispose();
     _s.dispose();
@@ -89,15 +92,11 @@ class _TimerScreenState extends State<TimerScreen> {
   void _reset() {
     _ticker?.cancel();
     _alarm?.cancel();
+    AlertService.stop();
     setState(() {
       _remaining = Duration.zero;
       _state = _TimerState.idle;
     });
-  }
-
-  void _ring() {
-    HapticFeedback.vibrate();
-    SystemSound.play(SystemSoundType.alert);
   }
 
   void _finish() {
@@ -107,9 +106,12 @@ class _TimerScreenState extends State<TimerScreen> {
       _remaining = Duration.zero;
       _state = _TimerState.finished;
     });
-    _ring();
+    AlertService.ring();
     _alarm?.cancel();
-    _alarm = Timer.periodic(const Duration(seconds: 2), (_) => _ring());
+    _alarm = Timer.periodic(
+      const Duration(seconds: 3),
+      (_) => AlertService.ring(),
+    );
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -123,7 +125,10 @@ class _TimerScreenState extends State<TimerScreen> {
           ),
         ],
       ),
-    ).then((_) => _alarm?.cancel());
+    ).then((_) {
+      _alarm?.cancel();
+      AlertService.stop();
+    });
   }
 
   void _preset(int minutes) {
