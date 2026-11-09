@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/tool.dart';
 import 'calculator/calculator_screen.dart';
 import 'converter/converter_screen.dart';
+import 'notes/notes_screen.dart';
 import 'stopwatch/stopwatch_screen.dart';
 import 'timer/timer_screen.dart';
 
@@ -16,6 +17,8 @@ Widget? _screenFor(String id) {
       return const StopwatchScreen();
     case 'timer':
       return const TimerScreen();
+    case 'notes':
+      return const NotesScreen();
     default:
       return null;
   }
