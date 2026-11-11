@@ -8,6 +8,7 @@ import '../features/calculator/calculator_screen.dart';
 import '../features/notes/notes_store.dart';
 import '../models/note.dart';
 import '../models/tool.dart';
+import 'alert_service.dart';
 
 class AppStorage {
   static SharedPreferences? _prefs;
@@ -32,6 +33,11 @@ class AppStorage {
       (m) => m.name == mode,
       orElse: () => ThemeMode.system,
     );
+
+    final sound = p.getString('timer_sound');
+    if (sound != null && soundOptions.any((s) => s.id == sound)) {
+      soundChoiceNotifier.value = sound;
+    }
 
     final known = allTools.map((t) => t.id).toSet();
     favoritesNotifier.value =
@@ -60,6 +66,9 @@ class AppStorage {
     final p = _prefs!;
     themeModeNotifier.addListener(() {
       p.setString('theme_mode', themeModeNotifier.value.name);
+    });
+    soundChoiceNotifier.addListener(() {
+      p.setString('timer_sound', soundChoiceNotifier.value);
     });
     favoritesNotifier.addListener(() {
       p.setStringList('favorites', favoritesNotifier.value.toList());
