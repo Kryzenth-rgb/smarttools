@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
+import '../../services/alert_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -17,6 +18,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final titleStyle = Theme.of(context).textTheme.titleMedium;
     return SafeArea(
       child: ListView(
@@ -53,6 +55,51 @@ class SettingsScreen extends StatelessWidget {
                       selected: {mode},
                       onSelectionChanged: (s) =>
                           themeModeNotifier.value = s.first,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          _card(
+            context,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Son du minuteur', style: titleStyle),
+                const SizedBox(height: 4),
+                ValueListenableBuilder<String>(
+                  valueListenable: soundChoiceNotifier,
+                  builder: (context, current, _) {
+                    return Column(
+                      children: [
+                        for (final s in soundOptions)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(
+                              s.id == current
+                                  ? Icons.radio_button_checked_rounded
+                                  : Icons.radio_button_unchecked_rounded,
+                              color: s.id == current ? scheme.primary : null,
+                            ),
+                            title: Text(s.name),
+                            trailing: IconButton(
+                              tooltip: 'Écouter',
+                              icon: const Icon(Icons.play_arrow_rounded),
+                              onPressed: () => AlertService.ring(
+                                soundId: s.id,
+                                vibrate: false,
+                              ),
+                            ),
+                            onTap: () {
+                              soundChoiceNotifier.value = s.id;
+                              AlertService.ring(
+                                soundId: s.id,
+                                vibrate: false,
+                              );
+                            },
+                          ),
+                      ],
                     );
                   },
                 ),
