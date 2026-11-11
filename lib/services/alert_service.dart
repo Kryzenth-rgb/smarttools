@@ -2,28 +2,86 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vibration/vibration.dart';
+
+class SoundOption {
+  final String id;
+  final String name;
+
+  const SoundOption(this.id, this.name);
+}
+
+const List<SoundOption> soundOptions = [
+  SoundOption('beep', 'Bip classique'),
+  SoundOption('melody', 'Mélodie douce'),
+  SoundOption('chime', 'Carillon'),
+];
+
+final ValueNotifier<String> soundChoiceNotifier =
+    ValueNotifier<String>('beep');
+
+class _Tone {
+  final double freq;
+  final int ms;
+  final int gapMs;
+
+  const _Tone(this.freq, this.ms, this.gapMs);
+}
 
 class AlertService {
   static final AudioPlayer _player = AudioPlayer();
-  static Uint8List? _wav;
+  static final Map<String, Uint8List> _cache = <String, Uint8List>{};
 
-  static Uint8List _buildWav() {
+  static List<_Tone> _tonesFor(String id) {
+    switch (id) {
+      case 'melody':
+        return const [
+          _Tone(523.25, 280, 40),
+          _Tone(659.25, 280, 40),
+          _Tone(783.99, 280, 40),
+          _Tone(1046.5, 700, 400),
+        ];
+      case 'chime':
+        return const [
+          _Tone(1318.51, 250, 30),
+          _Tone(987.77, 250, 30),
+          _Tone(783.99, 250, 30),
+          _Tone(987.77, 250, 30),
+          _Tone(1318.51, 600, 400),
+        ];
+      default:
+        return const [
+          _Tone(880, 300, 200),
+          _Tone(880, 300, 200),
+          _Tone(880, 300, 200),
+        ];
+    }
+  }
+
+  static Uint8List _synth(List<_Tone> tones, {required bool bell}) {
     const sampleRate = 22050;
     final pcm = <int>[];
-    for (var b = 0; b < 3; b++) {
-      const n = sampleRate * 300 ~/ 1000;
+    for (final t in tones) {
+      final n = sampleRate * t.ms ~/ 1000;
       for (var i = 0; i < n; i++) {
-        final edge = math.min(i, n - i) / 200.0;
-        final fade = math.min(1.0, edge);
-        final v = math.sin(2 * math.pi * 880 * i / sampleRate) * 0.8 * fade;
+        final x = i / sampleRate;
+        final attack = math.min(1.0, i / 150.0);
+        final release = math.min(1.0, (n - i) / 300.0);
+        final double env = bell ? math.exp(-4.0 * i / n) : 1.0;
+        var wave = math.sin(2 * math.pi * t.freq * x);
+        if (bell) {
+          wave += 0.3 * math.sin(2 * math.pi * t.freq * 2 * x);
+          wave += 0.1 * math.sin(2 * math.pi * t.freq * 3 * x);
+          wave /= 1.4;
+        }
+        final v = wave * env * math.min(attack, release) * 0.8;
         pcm.add((v * 32767).round());
       }
-      const gap = sampleRate * 200 ~/ 1000;
-      for (var i = 0; i < gap; i++) {
-        pcm.add(0);
-      }
+      final gap = sampleRate * t.gapMs ~/ 1000;
+      pcm.addAll(List<int>.filled(gap, 0));
     }
+
     final dataLen = pcm.length * 2;
     final bd = ByteData(44 + dataLen);
     void text(int offset, String s) {
@@ -51,17 +109,22 @@ class AlertService {
     return bd.buffer.asUint8List();
   }
 
-  static Future<void> ring() async {
+  static Future<void> ring({String? soundId, bool vibrate = true}) async {
+    final id = soundId ?? soundChoiceNotifier.value;
     try {
-      _wav ??= _buildWav();
+      final bytes = _cache.putIfAbsent(
+        id,
+        () => _synth(_tonesFor(id), bell: id != 'beep'),
+      );
       await _player.stop();
       await _player.play(
-        BytesSource(_wav!, mimeType: 'audio/wav'),
+        BytesSource(bytes, mimeType: 'audio/wav'),
         volume: 1.0,
       );
     } catch (_) {
       // Son indisponible sur cet appareil : on continue sans bloquer.
     }
+    if (!vibrate) return;
     try {
       final has = await Vibration.hasVibrator();
       if (has == true) {
