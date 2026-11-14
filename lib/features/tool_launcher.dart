@@ -5,6 +5,7 @@ import 'calculator/calculator_screen.dart';
 import 'converter/converter_screen.dart';
 import 'notes/notes_screen.dart';
 import 'stopwatch/stopwatch_screen.dart';
+import 'tasks/tasks_screen.dart';
 import 'timer/timer_screen.dart';
 
 Widget? _screenFor(String id) {
@@ -19,6 +20,8 @@ Widget? _screenFor(String id) {
       return const TimerScreen();
     case 'notes':
       return const NotesScreen();
+    case 'tasks':
+      return const TasksScreen();
     default:
       return null;
   }
