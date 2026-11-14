@@ -6,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../app/theme.dart';
 import '../features/calculator/calculator_screen.dart';
 import '../features/notes/notes_store.dart';
+import '../features/tasks/tasks_store.dart';
 import '../models/note.dart';
+import '../models/task.dart';
 import '../models/tool.dart';
 import 'alert_service.dart';
 
@@ -47,17 +49,30 @@ class AppStorage {
 
     calculatorHistory.value = p.getStringList('calc_history') ?? <String>[];
 
-    final raw = p.getString('notes');
-    if (raw != null) {
+    final rawNotes = p.getString('notes');
+    if (rawNotes != null) {
       try {
-        final list = jsonDecode(raw) as List<dynamic>;
+        final list = jsonDecode(rawNotes) as List<dynamic>;
         notesNotifier.value = [
           for (final e in list) Note.fromJson(e as Map<String, dynamic>),
         ];
       } catch (_) {
         // Données illisibles : on garde une copie avant tout écrasement.
-        p.setString('notes_corrupted_backup', raw);
+        p.setString('notes_corrupted_backup', rawNotes);
         notesNotifier.value = <Note>[];
+      }
+    }
+
+    final rawTasks = p.getString('tasks');
+    if (rawTasks != null) {
+      try {
+        final list = jsonDecode(rawTasks) as List<dynamic>;
+        tasksNotifier.value = [
+          for (final e in list) Task.fromJson(e as Map<String, dynamic>),
+        ];
+      } catch (_) {
+        p.setString('tasks_corrupted_backup', rawTasks);
+        tasksNotifier.value = <Task>[];
       }
     }
   }
@@ -83,6 +98,12 @@ class AppStorage {
       p.setString(
         'notes',
         jsonEncode(notesNotifier.value.map((n) => n.toJson()).toList()),
+      );
+    });
+    tasksNotifier.addListener(() {
+      p.setString(
+        'tasks',
+        jsonEncode(tasksNotifier.value.map((t) => t.toJson()).toList()),
       );
     });
   }
