@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/tool.dart';
 import 'calculator/calculator_screen.dart';
 import 'converter/converter_screen.dart';
+import 'device_info/device_info_screen.dart';
 import 'notes/notes_screen.dart';
 import 'password_generator/password_screen.dart';
 import 'stopwatch/stopwatch_screen.dart';
@@ -25,6 +26,8 @@ Widget? _screenFor(String id) {
       return const TasksScreen();
     case 'password':
       return const PasswordScreen();
+    case 'device':
+      return const DeviceInfoScreen();
     default:
       return null;
   }
