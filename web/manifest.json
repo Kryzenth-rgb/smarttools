@@ -1,6 +1,6 @@
 {
-    "name": "smarttools",
-    "short_name": "smarttools",
+    "name": "SmartTools",
+    "short_name": "SmartTools",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
