@@ -4,6 +4,7 @@ import '../models/tool.dart';
 import 'calculator/calculator_screen.dart';
 import 'converter/converter_screen.dart';
 import 'notes/notes_screen.dart';
+import 'password_generator/password_screen.dart';
 import 'stopwatch/stopwatch_screen.dart';
 import 'tasks/tasks_screen.dart';
 import 'timer/timer_screen.dart';
@@ -22,6 +23,8 @@ Widget? _screenFor(String id) {
       return const NotesScreen();
     case 'tasks':
       return const TasksScreen();
+    case 'password':
+      return const PasswordScreen();
     default:
       return null;
   }
